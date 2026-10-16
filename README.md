@@ -149,7 +149,6 @@ flowchart LR
     style C fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
     style D fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#fff
 ```
- - `python research/micro_encoder.py` -> `python research/behavioral_encode.py` -> `python research/contract_architect.py` -> `python research/visualize_contract.py`
 ---
 
 ## Visual Outcomes
