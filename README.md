@@ -1,13 +1,6 @@
 # Behavioral Microstructure Matching Engine
 
-## Research & IP Disclosure
-
-**NOTICE:**
-
-This repository contains the outcome exhibits, visualization pipelines, and documentation for the Behavioral-Microstructure Matching Framework. The underlying feature encoders and optimization engine are maintained in a private repository pending intellectual property filings.
-
----
-**ABOUT**
+## ABOUT
 
 An analytical research framework and visual execution suite engineered to evaluate high-frequency market microstructure dynamics, limit order book (LOB) queue priority, and behavioral liquidity matching matrices across volatile trading regimes.
 
@@ -20,12 +13,15 @@ This repository processes order flow telemetry to model how non-linear trader be
 ```text
 .
 ├── outcomes/
-│   ├── architect_research_exhibit3.png                              # Architectural schematic & system flow
-│   ├── architect_results3.png                                       # Benchmark results & execution metrics
-│   └── matching_matrix3.png                                         # Liquidity depth & order matching matrix
+│   ├── architect_research_exhibit3.png          # Architectural schematic & system flow
+│   ├── architect_results3.png                  # Benchmark results & execution metrics
+│   └── matching_matrix3.png                    # Liquidity depth & order matching matrix
 ├── research/
-│   └── visualize_contract.py                                        # Primary analytical & visualization script
-├── .gitignore                                                       # must include .env
+│   ├── behavioral_encode.py                    # Behavioral data encoding module
+│   ├── contract_architect.py                   # Custom contract generation logic
+│   ├── micro_encoder.py                        # Microstructure data processing encoder
+│   └── visualize_contract.py                   # Primary analytical & visualization script
+├── .gitignore                                  # Environment & local artifact exclusions
 ├── README.md
 └── requirements.txt
 ```
@@ -95,36 +91,44 @@ The matching engine integrates high-frequency limit order book (LOB) microdata a
 
 ```mermaid
 graph TD
-    %% Order Flow Inputs
-    A[Order Book Telemetry & Limit Orders] --> B[Behavioral Microstructure Engine]
-    
-    %% Engine Processing
-    B --> C[research/visualize_contract.py]
-    C --> D[Queue Priority & Matching Logic]
-    C --> E[Liquidity Density & Matrix Evaluation]
-    
+    %% Order Flow & Data Inputs
+    A[Order Book Telemetry & Market Data] --> B[research/micro_encoder.py]
+    A --> C[research/behavioral_encode.py]
+
+    %% Modular Engine Processing
+    B --> D[research/contract_architect.py]
+    C --> D
+    D --> E[research/visualize_contract.py]
+
+    %% Analytics & Matching Logic
+    E --> F[Queue Priority & Matching Logic]
+    E --> G[Liquidity Density & Matrix Evaluation]
+
     %% Output Exhibits
-    D --> F[outcomes/architect_research_exhibit3.png]
-    E --> G[outcomes/matching_matrix3.png]
-    D --> H[outcomes/architect_results3.png]
+    F --> H[outcomes/architect_research_exhibit3.png]
+    G --> I[outcomes/matching_matrix3.png]
+    F --> J[outcomes/architect_results3.png]
 ```
 
 ---
 
 ## Core Analytics & Research Focus
 
-1. **Behavioral Order Flow Modeling:**
+1. **Microstructure Telemetry & Behavioral Bias Encoding (`micro_encoder.py` & `behavioral_encode.py`):**
+   - **Microstructure Signals:** `micro_encoder.py` processes high-frequency order book data to compute Weighted Average Price (WAP), log-return realized volatility, and Order Flow Imbalance (OFI) to quantify net buying/selling pressure.
+   - **Behavioral Profiling:** `behavioral_encode.py` parses demographic survey data (ACS) to derive a user `bias_score` based on historical economic exposure, classifying individual trader tendencies (e.g., Frugality vs. Overconfidence).
 
-   - Evaluates trader behavior under stress, analyzing how panic cancellations and adverse selection alter queue position dynamics and order book depth.
+2. **Personalized Risk & Contract Architecture (`contract_architect.py`):**
+   - Combines microstructure market risk ($\text{Realized Volatility} \times (1 + \vert{}\text{OFI}\vert{})$) with psychological bias scores:
+     - **Overconfidence Buffer (`bias > 0.4`):** Dynamically scales hedge ratio by **1.5x** to cushion against over-leveraging.
+     - **Frugality Efficiency (`bias < -0.4`):** Optimizes hedge ratio to **0.8x** for cost efficiency.
+     - **Standard Alignment:** Preserves **1.0x** base market risk hedge ratio.
 
-2. **Microstructure Matching Matrix:**
-
-   - Maps multi-tier order execution efficiency across varying spread regimes, order sizes, and latency thresholds.
-
-3. **Visual Execution Diagnostics:**
-
-   - Generates high-resolution performance plots to isolate execution slippage, fill ratios, and latency bottlenecks under high-throughput conditions.
-
+3. **Visual Execution Diagnostics & Sensitivity Heatmaps (`visualize_contract.py`):**
+   - Generates three analytical diagnostic exhibits saved to `outcomes/`:
+     - `architect_research_exhibit3.png`: Population bias distribution alongside market volatility sensitivity bands.
+     - `architect_results3.png`: User age vs. final hedge ratio scatter plots categorized by behavioral correction type.
+     - `matching_matrix3.png`: 2D heatmap matrix evaluating target hedge ratios across market micro-volatility and user behavioral bias.
 ---
 
 ## Setup & Execution
@@ -133,10 +137,19 @@ graph TD
 
    `pip install -r requirements.txt`
 
- 2. **Running the Analytical Suite:**
+2. **Sequence to run the files**
+```mermaid
+flowchart LR
+    A["1️⃣ micro_encoder.py<br/><i>(Microstructure Signals)</i>"] --> B["2️⃣ behavioral_encode.py<br/><i>(Behavioral Profiling)</i>"]
+    B --> C["3️⃣ contract_architect.py<br/><i>(Contract Matching)</i>"]
+    C --> D["4️⃣ visualize_contract.py<br/><i>(Plots & Exhibits)</i>"]
 
-    `python research/visualize_contract.py`
-
+    style A fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style B fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style C fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
+    style D fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#fff
+```
+ - `python research/micro_encoder.py` -> `python research/behavioral_encode.py` -> `python research/contract_architect.py` -> `python research/visualize_contract.py`
 ---
 
 ## Visual Outcomes
