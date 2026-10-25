@@ -1,57 +1,58 @@
+# micro_encoder.py
+import duckdb
 import pandas as pd
-import numpy as np
 import os
 
-def calc_wap(df):
-    "Calculates Weighted Average Price (Micro-Perspective)"
-    # Using 'bid_price1' and 'ask_price1' from Optiver book data
-    wap = (df['bid_price1'] * df['ask_size1'] + df['ask_price1'] * df['bid_size1']) / (df['bid_size1'] + df['ask_size1'])
-    return wap
-
-def calc_order_flow_imbalance(df):
-    "Measures the 'Net Buying Pressure'. Key variable' Information-Theoretic approach."
-    return (df['bid_size1'] - df['ask_size1']) / (df['bid_size1'] + df['ask_size1'])
-
-def process_microstructure_data(file_path):
+def process_microstructure_data(file_path="../outcomes/parquet/cleaned_microstructure.parquet"):
+    """
+    Safely loads pre-cleaned microstructure data using DuckDB, 
+    inspects columns, and standardizes them for contract architecture.
+    """
     if not os.path.exists(file_path):
-        print(f"Error: Path {file_path} not found.")
-        return None
+        alt_path = "../outcomes/parquet/cleaned_microstructure.parquet"
+        if os.path.exists(alt_path):
+            file_path = alt_path
+        else:
+            print(f"Error: Cleaned microstructure file not found at {file_path} or {alt_path}.")
+            return None
     
-    # Load local parquet
-    df = pd.read_parquet(file_path).head(1000)
+    print(f"Loading pre-cleaned microstructure data safely via DuckDB from {file_path}...")
     
-    # Feature Engineering
-    df['wap'] = calc_wap(df)
-
-
-    # Calculate log returns per time_id
-    df['log_return'] = df.groupby('time_id')['wap'].transform(lambda x: np.log(x).diff())
-
-
-    # Order Flow Imbalance (Microstructure Signal)
-    df['ofi'] = calc_order_flow_imbalance(df)
-
+    # Query a memory-safe subset using DuckDB
+    query = f"SELECT * FROM read_parquet('{file_path}') LIMIT 50000"
+    df = duckdb.query(query).to_df()
     
-    # Aggregating to the 'Market State' level
-    features = df.groupby('time_id').agg({
-        'log_return': lambda x: np.sqrt(np.sum(x**2)),
-        'ofi': 'mean',
-        'bid_size1': 'mean',
-        'ask_size1': 'mean'
-    }).reset_index()
-
-    # Rename columns for clarity
-    features.columns = ['time_id', 'realized_vol', 'avg_ofi', 'mean_bid_size', 'mean_ask_size']
-    features['liquidity_depth'] = features['mean_bid_size'] + features['mean_ask_size']
+    print(f"Available columns in parquet: {df.columns.tolist()}")
     
-    return features
-# Local Test Execution
+    # Automatically map common column name variations to what the pipeline expects
+    rename_map = {}
+    for col in df.columns:
+        col_lower = col.lower()
+        if any(term in col_lower for term in ['vol', 'volatility']) and 'realized_vol' not in df.columns:
+            rename_map[col] = 'realized_vol'
+        elif any(term in col_lower for term in ['ofi', 'order_flow']) and 'avg_ofi' not in df.columns:
+            rename_map[col] = 'avg_ofi'
+            
+    if rename_map:
+        df = df.rename(columns=rename_map)
+        print(f"Standardized columns: {df.columns.tolist()}")
+        
+    # Fallback defaults if columns are completely missing to prevent crashes
+    if 'realized_vol' not in df.columns:
+        print("Warning: 'realized_vol' not found. Assigning default baseline volatility.")
+        df['realized_vol'] = 0.005
+    if 'avg_ofi' not in df.columns:
+        print("Warning: 'avg_ofi' not found. Assigning default baseline OFI.")
+        df['avg_ofi'] = 0.0
+
+    print(f"Loaded {len(df):,} market state records safely into memory.")
+    return df
+
 if __name__ == "__main__":
-    LOCAL_PATH = "../data/optiver/book_train.parquet"
-    test_file = os.path.join(LOCAL_PATH, "stock_id=0")
-    if os.path.exists(test_file):
-        micro_signals = process_microstructure_data(test_file)
-        print("Microstructure signals generated successfully!")
+    PARQUET_PATH = "../outcomes/parquet/cleaned_microstructure.parquet"
+    micro_signals = process_microstructure_data(PARQUET_PATH)
+    if micro_signals is not None:
+        print("Microstructure signals loaded successfully!")
         print(micro_signals.head())
     else:
-        print(f"Please ensure data is in: {test_file}")
+        print(f"Please ensure file exists at: {PARQUET_PATH}")
