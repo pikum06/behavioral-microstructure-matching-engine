@@ -13,15 +13,29 @@ This repository processes order flow telemetry to model how non-linear trader be
 ```text
 .
 ├── outcomes/
-│   ├── architect_research_exhibit3.png          # Architectural schematic & system flow
-│   ├── architect_results3.png                  # Benchmark results & execution metrics
-│   └── matching_matrix3.png                    # Liquidity depth & order matching matrix
+│   ├── graphs/
+│   │   ├── adjustment_type_pie.png
+│   │   ├── architect_research_exhibit3.png
+│   │   ├── architect_results3.png
+│   │   └── matching_matrix3.png
+│   └── models/
+│       ├── behavioral_cols.json
+│       ├── behavioral_norm_params.npz
+│       └── global_behavioral_autoencoder.h5
 ├── research/
-│   ├── behavioral_encode.py                    # Behavioral data encoding module
-│   ├── contract_architect.py                   # Custom contract generation logic
-│   ├── micro_encoder.py                        # Microstructure data processing encoder
-│   └── visualize_contract.py                   # Primary analytical & visualization script
-├── .gitignore                                  # Environment & local artifact exclusions
+│   ├── data_cleaning/
+│   │   ├── acs/
+│   │   │   ├── clean_data.py
+│   │   │   ├── global_model.py
+│   │   │   └── main.py
+│   │   └── optiver/
+│   │       └── data_clean_parquet.py
+│   ├── behavioral_encode.py
+│   ├── contract_architect.py
+│   ├── main.py
+│   ├── micro_encoder.py
+│   └── visualize_contract.py
+├── .gitignore
 ├── README.md
 └── requirements.txt
 ```
@@ -89,25 +103,32 @@ The matching engine integrates high-frequency limit order book (LOB) microdata a
 
 ## Microstructure & Matching Pipeline
 
+## Microstructure & Matching Pipeline
+
 ```mermaid
 graph TD
-    %% Order Flow & Data Inputs
-    A[Order Book Telemetry & Market Data] --> B[research/micro_encoder.py]
-    A --> C[research/behavioral_encode.py]
+    %% Data Cleaning & Preprocessing
+    subgraph Data Cleaning Pipeline
+        A1[research/data_cleaning/acs/main.py] -->|Executes global_model & clean_data| A2[outcomes/models/]
+        B1[research/data_cleaning/optiver/data_clean_parquet.py] --> B2[Parquet Datasets]
+    end
 
-    %% Modular Engine Processing
-    B --> D[research/contract_architect.py]
-    C --> D
-    D --> E[research/visualize_contract.py]
+    %% Research Pipeline Execution
+    subgraph Research Execution Pipeline
+        C[research/main.py] --> D[research/behavioral_encode.py]
+        C --> E[research/micro_encoder.py]
+        D -->|CSV Data Inputs| F[research/contract_architect.py]
+        E -->|Parquet Data Inputs| F
+        F --> G[research/visualize_contract.py]
+    end
 
-    %% Analytics & Matching Logic
-    E --> F[Queue Priority & Matching Logic]
-    E --> G[Liquidity Density & Matrix Evaluation]
-
-    %% Output Exhibits
-    F --> H[outcomes/architect_research_exhibit3.png]
-    G --> I[outcomes/matching_matrix3.png]
-    F --> J[outcomes/architect_results3.png]
+    %% Final Output Graphs
+    subgraph Output Exhibits
+        G --> H1[outcomes/graphs/adjustment_type_pie.png]
+        G --> H2[outcomes/graphs/architect_research_exhibit3.png]
+        G --> H3[outcomes/graphs/architect_results3.png]
+        G --> H4[outcomes/graphs/matching_matrix3.png]
+    end
 ```
 
 ---
@@ -129,6 +150,7 @@ graph TD
      - `architect_research_exhibit3.png`: Population bias distribution alongside market volatility sensitivity bands.
      - `architect_results3.png`: User age vs. final hedge ratio scatter plots categorized by behavioral correction type.
      - `matching_matrix3.png`: 2D heatmap matrix evaluating target hedge ratios across market micro-volatility and user behavioral bias.
+     - `adjustment_matrix.png`: 
 ---
 
 ## Setup & Execution
@@ -155,19 +177,23 @@ flowchart LR
 
 1. **architect_research_exhibit3.png**
 
-![Contract Sensitivity: Microstructure vs. Behavioral Hedge](outcomes/architect_research_exhibit3.png)
+![Contract Sensitivity: Microstructure vs. Behavioral Hedge](outcomes/graphs/architect_research_exhibit3.png)
 
 The above graph represents the mechanical advantage of the Behavioral-Microstructure Matching Engine. As the users are exposed to different degrees of actual market volatility in this simulation, the scaling of the Hedge Ratio is depicted by the red curve. This design, in contrast to conventional static models, makes use of real-time market microstructure data to modify protection levels; in particular, it increases the hedge when a user's own behavioral bias clashes with the current market “fear” (liquidity shocks).
 
 2. **architect_results3.png**
 
-![Contract Sensitivity: Microstructure vs. Behavioral Hedge](outcomes/architect_results3.png)
+![Contract Sensitivity: Microstructure vs. Behavioral Hedge](outcomes/graphs/architect_results3.png)
 
-As shown in the above figure, the system successfully extracts and quantifies the “Experience Effect” across a demographic sample of 500000 users sourced from the American Consumer Survey (ACS). By applying a smooth-decay exponential function to formative economic years, such as the 2008 Recession, the model maps a distinct population distribution of risk-tolerance. This data serves as the foundational layer for “Personalized Black-Scholes” contracts, ensuring that institutional protection is calibrated to an individual's unique historical economic exposure.
+As shown in the above figure, the system successfully extracts and quantifies the “Experience Effect” across a demographic dataset of 1.4 milliion users sourced from the American Consumer Survey (ACS) 2015. By applying a smooth-decay exponential function tom ormative economic years, such as the 2008 Recession, the model maps a distinct population distribution of risk-tolerance. This data serves as the foundational layer for “Personalized Black-Scholes” contracts, ensuring that institutional protection is calibrated to an individual's unique historical economic exposure.
 
 3. **matching_matrix3.png**
 
-![Contract Sensitivity: Microstructure vs. Behavioral Hedge](outcomes/matching_matrix3.png)
+![Contract Sensitivity: Microstructure vs. Behavioral Hedge](outcomes/graphs/matching_matrix3.png)
 
 A high precision heatmap for institutional risk management is shown in the above figure. The matrix finds crucial “High-Risk Zones” where protocol solvency is most susceptible to psychological panic by intersecting User Behavioral Bias with Market Realized Volatility. Decentralized banking protocols can anticipate and reduce systemic risk prior to a de-pegging or liquidation event by using this picture as the “Proof of Efficacy” for a hardware-agnostic security layer.
+
+4. **`adjustment_type_pie.png`**
+   ![Behavioral Adjustments Proportion](outcomes/graphs/adjustment_type_pie.png)
+   *Proportional breakdown of behavioral correction policies across the full 1.5 million population, highlighting distribution across Overconfidence Buffers, Frugality Optimizations, and Standard Risk Alignments.*
 
