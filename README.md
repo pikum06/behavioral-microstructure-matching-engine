@@ -207,13 +207,22 @@ graph TD
      - `matching_matrix.png`: 2D heatmap matrix evaluating target hedge ratios across market micro-volatility and user behavioral bias. 
 ---
 
-## Setup & Execution
+## Installation & Environment Setup
 
-1. **Installation:**
+1. **Clone the Repository**
 
-   `pip install -r requirements.txt`
+Clone the repository and navigate into the project directory:
 
-2. **Execution Sequence**
+    `git clone [https://github.com/pikum06/behavioral-microstructure-matching-engine-demo.git](https://github.com/pikum06/behavioral-microstructure-matching-engine-demo.git)`
+
+2. **Create Virtual Environment**
+
+    `python3 -m venv venv`
+
+3. **Install Dependencies**
+    `pip install -r requirements.txt`
+
+## Execution Sequence
 
 To run the complete pipeline from scratch, execute the steps in the following strict sequential order:
 
@@ -239,7 +248,8 @@ Run the feature engineering pipeline to generate behavioral encoders, market tel
 
 1. Execute the feature engineering master script `(feature_engineering/main.py)`, which sequentially runs `behavioral_encode.py`, `micro_encoder.py`, `contract_architect.py`, `test_pipeline.py`, and `visualize_contract.py`: `python feature_engineering/main.py`
 
-```flowchart TD
+```mermaid
+flowchart TD
     subgraph Step1 ["Step 1: Data Cleaning"]
         DC_ACS["data_cleaning/acs/main.py<br/>(Executes global_model & clean_data)"] --> DC_PAR["data_cleaning/optiver/data_clean_parquet.py"]
     end
