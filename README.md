@@ -150,7 +150,7 @@ graph TD
     DC_PAR --> FE_ME
 ```
 
-Data Analysis Pipeline
+### Data Analysis Pipeline
 
 ```mermaid
 graph TD
@@ -177,22 +177,34 @@ graph TD
 
 ## Core Analytics & Research Focus
 
-1. **Microstructure Telemetry & Behavioral Bias Encoding (`micro_encoder.py` & `behavioral_encode.py`):**
+1. **Exploratory Data Analysis (`data_analysis/`):**
+   
+   - **ACS Demographic Analysis (`data_analysis_acs.py`):** Evaluates population income distributions, age densities, and economic inequality metrics, generating analytical exhibits such as `income_age_density.png`, `median_income_by_age.png`, `income_percentiles_by_age.png`, `income_distribution.png`, and `lorenz_curve.png`.
+   
+   - **Order Book Microstructure Analysis (`data_analysis_parquet.py`):** Processes high-frequency Optiver parquet data to study price dynamics and volatility patterns, producing charts including `wap_time_series.png`, `return_distribution.png`, `volatility_distribution.png`, `return_vs_volatility.png`, `volatility_clustering_time_series.png`, and `volatility_vs_next_return.png`.
+
+2. **Microstructure Telemetry & Behavioral Bias Encoding (`feature_engineering/micro_encoder.py` & `feature_engineering/behavioral_encode.py`):**
+
    - **Microstructure Signals:** `micro_encoder.py` processes high-frequency order book data to compute Weighted Average Price (WAP), log-return realized volatility, and Order Flow Imbalance (OFI) to quantify net buying/selling pressure.
+ 
    - **Behavioral Profiling:** `behavioral_encode.py` parses demographic survey data (ACS) to derive a user `bias_score` based on historical economic exposure, classifying individual trader tendencies (e.g., Frugality vs. Overconfidence).
 
-2. **Personalized Risk & Contract Architecture (`contract_architect.py`):**
-   - Combines microstructure market risk ($\text{Realized Volatility} \times (1 + \vert{}\text{OFI}\vert{})$) with psychological bias scores:
+3. **Personalized Risk & Contract Architecture (`feature_engineering/contract_architect.py`):**
+ 
+   - Combines microstructure market risk ($\text{Realized Volatility} \times (1 + \vert\text{OFI}\vert)$) with psychological bias scores:
+   
      - **Overconfidence Buffer (`bias > 0.4`):** Dynamically scales hedge ratio by **1.5x** to cushion against over-leveraging.
      - **Frugality Efficiency (`bias < -0.4`):** Optimizes hedge ratio to **0.8x** for cost efficiency.
      - **Standard Alignment:** Preserves **1.0x** base market risk hedge ratio.
 
-3. **Visual Execution Diagnostics & Sensitivity Heatmaps (`visualize_contract.py`):**
-   - Generates three analytical diagnostic exhibits saved to `outcomes/`:
-     - `architect_research_exhibit3.png`: Population bias distribution alongside market volatility sensitivity bands.
-     - `architect_results3.png`: User age vs. final hedge ratio scatter plots categorized by behavioral correction type.
-     - `matching_matrix3.png`: 2D heatmap matrix evaluating target hedge ratios across market micro-volatility and user behavioral bias.
-     - `adjustment_matrix.png`: 
+5. **Visual Execution Diagnostics & Sensitivity Heatmaps (`feature_engineering/visualize_contract.py`):**
+
+   - Generates core contract-level research graphs saved to `outcomes/graphs/`:
+   
+     - `bias_distribution.png`: Population bias distribution alongside market volatility sensitivity bands.
+     - `bias_vs_hedge_ratio.png`: User demographic/bias metrics versus final hedge ratio allocations.
+     - `hedge_vs_volatility.png`: Dynamic contract hedge adjustments across varying volatility regimes.
+     - `matching_matrix.png`: 2D heatmap matrix evaluating target hedge ratios across market micro-volatility and user behavioral bias. 
 ---
 
 ## Setup & Execution
@@ -201,17 +213,51 @@ graph TD
 
    `pip install -r requirements.txt`
 
-2. **Sequence to run the files**
-```mermaid
-flowchart LR
-    A["1️⃣ micro_encoder.py<br/><i>(Microstructure Signals)</i>"] --> B["2️⃣ behavioral_encode.py<br/><i>(Behavioral Profiling)</i>"]
-    B --> C["3️⃣ contract_architect.py<br/><i>(Contract Matching)</i>"]
-    C --> D["4️⃣ visualize_contract.py<br/><i>(Plots & Exhibits)</i>"]
+2. **Execution Sequence**
 
-    style A fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
-    style B fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
-    style C fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
-    style D fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#fff
+To run the complete pipeline from scratch, execute the steps in the following strict sequential order:
+
+### Step 1: Data Cleaning
+
+Run the data cleaning pipelines to preprocess raw demographic and market data:
+
+1. Navigate to `data_cleaning/acs/` and run `main.py` (which automatically executes `global_model.py` and `clean_data.py`): `python data_cleaning/acs/main.py`
+
+Run the Optiver parquet data cleaning script:
+
+2. Navigate to `data_cleaning/optiver/`and run `python data_cleaning/optiver/data_clean_parquet.py`
+
+### Step 2: Data Analysis
+
+Run exploratory data analysis across the cleaned datasets:
+
+1. Execute the data analysis master script `(data_analysis/main.py)`, which runs `data_analysis_acs.py` and `data_analysis_parquet.py`: `python data_analysis/main.py`
+
+### Step 3: Feature Engineering
+
+Run the feature engineering pipeline to generate behavioral encoders, market telemetry, risk contracts, and visual exhibits:
+
+1. Execute the feature engineering master script `(feature_engineering/main.py)`, which sequentially runs `behavioral_encode.py`, `micro_encoder.py`, `contract_architect.py`, `test_pipeline.py`, and `visualize_contract.py`: `python feature_engineering/main.py`
+
+```flowchart TD
+    subgraph Step1 ["Step 1: Data Cleaning"]
+        DC_ACS["data_cleaning/acs/main.py<br/>(Executes global_model & clean_data)"] --> DC_PAR["data_cleaning/optiver/data_clean_parquet.py"]
+    end
+
+    subgraph Step2 ["Step 2: Data Analysis"]
+        DA_MAIN["data_analysis/main.py<br/>(Executes analysis_acs & analysis_parquet)"]
+    end
+
+    subgraph Step3 ["Step 3: Feature Engineering"]
+        FE_MAIN["feature_engineering/main.py<br/>(Executes behavioral_encode, micro_encoder,<br/>contract_architect, test_pipeline, visualize_contract)"]
+    end
+
+    Step1 --> Step2
+    Step2 --> Step3
+
+    style Step1 fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style Step2 fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
+    style Step3 fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#fff
 ```
 ---
 
