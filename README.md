@@ -122,27 +122,27 @@ The matching engine integrates high-frequency limit order book (LOB) microdata a
 ```mermaid
 graph TD
     %% Step 1: Data Cleaning Pipeline
-    subgraph Step 1: Data Cleaning Pipeline
-        DC1[data_cleaning/acs/main.py] -->|Executes global_model & clean_data| DC_MOD[outcomes/models/]
-        DC2[data_cleaning/optiver/data_clean_parquet.py] --> DC_PAR[Cleaned Parquet Datasets]
+    subgraph Step1 ["Step 1: Data Cleaning Pipeline"]
+        DC1["data_cleaning/acs/main.py"] -->|"Executes global_model & clean_data"| DC_MOD["outcomes/models/"]
+        DC2["data_cleaning/optiver/data_clean_parquet.py"] --> DC_PAR["Cleaned Parquet Datasets"]
     end
 
     %% Step 2: Data Analysis Pipeline
-    subgraph Step 2: Data Analysis Pipeline
-        DA_MAIN[data_analysis/main.py] --> DA1[data_analysis/data_analysis_acs.py]
-        DA_MAIN --> DA2[data_analysis/data_analysis_parquet.py]
+    subgraph Step2 ["Step 2: Data Analysis Pipeline"]
+        DA_MAIN["data_analysis/main.py"] --> DA1["data_analysis/data_analysis_acs.py"]
+        DA_MAIN --> DA2["data_analysis/data_analysis_parquet.py"]
     end
 
     %% Step 3: Feature Engineering Pipeline
-    subgraph Step 3: Feature Engineering Pipeline
-        FE_MAIN[feature_engineering/main.py<br/>Master Orchestrator] --> FE_BE[feature_engineering/behavioral_encode.py<br/>ACS -> behavioral/bias features]
-        FE_MAIN --> FE_ME[feature_engineering/micro_encoder.py<br/>Optiver -> WAP, return, rolling volatility]
+    subgraph Step3 ["Step 3: Feature Engineering Pipeline"]
+        FE_MAIN["feature_engineering/main.py (Master)"] --> FE_BE["feature_engineering/behavioral_encode.py"]
+        FE_MAIN --> FE_ME["feature_engineering/micro_encoder.py"]
         
-        FE_BE --> FE_CA[feature_engineering/contract_architect.py<br/>user profile + market state -> hedge/risk contract]
-        FE_ME --> FE_CA
+        FE_BE -->|"CSV Inputs"| FE_CA["feature_engineering/contract_architect.py"]
+        FE_ME -->|"Parquet Inputs"| FE_CA
         
-        FE_CA --> FE_TP[feature_engineering/test_pipeline.py<br/>verifies ACS + microstructure + contract interface]
-        FE_TP --> FE_VC[feature_engineering/visualize_contract.py<br/>generates contract-level research graphs]
+        FE_CA --> FE_TP["feature_engineering/test_pipeline.py"]
+        FE_TP --> FE_VC["feature_engineering/visualize_contract.py"]
     end
 
     %% Data Flow Dependencies
@@ -150,11 +150,11 @@ graph TD
     DC_PAR --> FE_ME
 
     %% Final Output Graphs
-    subgraph Output Exhibits
-        FE_VC --> G1[outcomes/graphs/matching_matrix.png]
-        FE_VC --> G2[outcomes/graphs/bias_distribution.png]
-        FE_VC --> G3[outcomes/graphs/personalized_hedge_vs_volatility.png]
-        FE_VC --> G4[outcomes/graphs/... (all 15 exhibits)]
+    subgraph Outputs ["Output Exhibits"]
+        FE_VC --> G1["outcomes/graphs/matching_matrix.png"]
+        FE_VC --> G2["outcomes/graphs/bias_distribution.png"]
+        FE_VC --> G3["outcomes/graphs/personalized_hedge_vs_volatility.png"]
+        FE_VC --> G4["outcomes/graphs/ (15+ exhibits total)"]
     end
 ```
 
