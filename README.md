@@ -141,7 +141,7 @@ graph TD
         %% Contract Visualization Graphs
         FE_VC --> FE_G1["bias_distribution.png"]
         FE_VC --> FE_G2["bias_vs_hedge_ratio.png"]
-        FE_VC --> FE_G3["hedge_vs_volatility.png"]
+        FE_VC --> FE_G3["personalized_hedge_vs_volatility.png"]
         FE_VC --> FE_G4["matching_matrix.png"]
     end
 
@@ -273,25 +273,92 @@ flowchart TD
 
 ## Visual Outcomes
 
-1. **architect_research_exhibit3.png**
+1. **bias_distribution.png**
 
-![Contract Sensitivity: Microstructure vs. Behavioral Hedge](outcomes/graphs/architect_research_exhibit3.png)
+![Distribution of Model-Implied Behavioral Scores](outcomes/graphs/bias_distribution.png)
 
-The above graph represents the mechanical advantage of the Behavioral-Microstructure Matching Engine. As the users are exposed to different degrees of actual market volatility in this simulation, the scaling of the Hedge Ratio is depicted by the red curve. This design, in contrast to conventional static models, makes use of real-time market microstructure data to modify protection levels; in particular, it increases the hedge when a user's own behavioral bias clashes with the current market “fear” (liquidity shocks).
+The figure above illustrates the population-wide frequency distribution and Kernel Density Estimation (KDE) curve of model-implied behavioral bias scores ($B_i$) derived from demographic and macroeconomic exposure modeling across the dataset. The vertical dashed lines delineate critical policy boundaries: the orange dashed line indicates the Frugality Threshold ($B_i < -0.4$), while the red dashed line marks the Overconfidence Threshold ($B_i > 0.4$). This distribution underpins the multi-tier risk adjustment engine, ensuring that individualized contract parameters dynamically scale according to population-level psychological skew.
 
-2. **architect_results3.png**
+2. **bias_vs_hedge_ratio.png**
 
-![Contract Sensitivity: Microstructure vs. Behavioral Hedge](outcomes/graphs/architect_results3.png)
+![Contract Architecture: Behavioral Bias vs. Personalized Hedge Ratio](outcomes/graphs/bias_vs_hedge_ratio.png)
 
-As shown in the above figure, the system successfully extracts and quantifies the “Experience Effect” across a demographic dataset of 1.4 milliion users sourced from the American Consumer Survey (ACS) 2015. By applying a smooth-decay exponential function tom ormative economic years, such as the 2008 Recession, the model maps a distinct population distribution of risk-tolerance. This data serves as the foundational layer for “Personalized Black-Scholes” contracts, ensuring that institutional protection is calibrated to an individual's unique historical economic exposure.
+The above scatter plot maps individual Behavioral Bias Scores ($B_i$) against the resulting Personalized Hedge Ratio ($H_i$) across three distinct behavioral regimes. Color-coded markers distinguish Frugality ($B_i < -0.4$, orange), Standard Risk Alignment ($ -0.4 \le B_i \le 0.4$, blue), and Overconfidence ($B_i > 0.4$, red) regimes, bounded by vertical dotted threshold lines. The step-function response demonstrates how institutional hedging multipliers are structurally adjusted to penalize overconfidence while rewarding conservative allocations.
 
-3. **matching_matrix3.png**
+3. **income_age_density.png**
 
-![Contract Sensitivity: Microstructure vs. Behavioral Hedge](outcomes/graphs/matching_matrix3.png)
+![Joint Distribution: Age vs. Income](outcomes/graphs/income_age_density.png)
 
-A high precision heatmap for institutional risk management is shown in the above figure. The matrix finds crucial “High-Risk Zones” where protocol solvency is most susceptible to psychological panic by intersecting User Behavioral Bias with Market Realized Volatility. Decentralized banking protocols can anticipate and reduce systemic risk prior to a de-pegging or liquidation event by using this picture as the “Proof of Efficacy” for a hardware-agnostic security layer.
+The hexbin joint density plot above visualizes the bivariative distribution of User Age against Income across the demographic dataset. The color bar intensity represents observation density, highlighting major lifecycle earning clusters and income concentrations across age cohorts. This empirical mapping verifies how macroeconomic inputs from the American Community Survey correlate with earning lifecycles prior to behavioral indexing.
 
-4. **`adjustment_type_pie.png`**
-   ![Behavioral Adjustments Proportion](outcomes/graphs/adjustment_type_pie.png)
-   *Proportional breakdown of behavioral correction policies across the full 1.5 million population, highlighting distribution across Overconfidence Buffers, Frugality Optimizations, and Standard Risk Alignments.*
+4. **income_distribution.png**
 
+![Income Distribution](outcomes/graphs/income_distribution.png)
+
+The figure above displays the overall frequency distribution and kernel density curve of user income across the cleaned dataset. Characterized by a strong positive skew, the distribution captures heavy clustering in lower-to-middle income brackets with a long tail extending toward high-net-worth brackets. This macro-level income dispersion provides the baseline economic heterogeneity necessary for evaluating financial product sensitivity across varying wealth tiers.
+
+5. **income_percentiles_by_age.jpg**
+
+![Income Percentiles by Age](outcomes/graphs/income_percentiles_by_age.png)
+
+The figure above illustrates the lifecycle trajectory of income percentiles across user age cohorts, plotting the Median (P50, solid dark blue line) alongside the 75th (P75, dashed teal line) and 25th (P25, dashed orange line) percentiles. The shaded interquartile range (IQR) highlights the widening dispersion of earnings during prime working years before tapering into retirement. This lifecycle economic profiling provides structural context for evaluating how financial risk tolerance and wealth accumulation evolve across different demographic stages.
+
+6. **lorenz_curve.png**
+
+![Lorenz Curve & Income Inequality (Variant 2)](outcomes/graphs/lorenz_curve.png)
+
+This supplementary Lorenz Curve and inequality visualization (Gini = $0.4881$) provides a comparative distributional view of cumulative population shares against cumulative income shares. It serves as an auxiliary diagnostic tool to validate income skewness and structural inequality parameters prior to integrating macro-demographic data into the downstream financial architecture.
+
+7. **matching_matrix.jpg**
+
+![Architect Matching Matrix: Optiver Volatility Percentiles vs. Behavioral Bias](outcomes/graphs/matching_matrix.png)
+
+The figure above presents the Architect Matching Matrix, a high-precision heatmap intersecting Model-Implied Behavioral Bias Scores ($B_i$) on the vertical axis with Optiver Observed Market Volatility Percentiles ($\sigma_t$) on the horizontal axis. The color gradient represents the resulting Hedge Ratio (%), identifying critical high-risk zones where extreme behavioral skews meet elevated market volatility. This matrix serves as the core proof of efficacy for protocol risk management, enabling decentralized banking systems to preemptively calibrate protection levels before liquidation events occur.
+
+8. **median_income_by_age.png**
+
+![Median Income by Age](outcomes/graphs/median_income_by_age.png)
+
+The graph above charts the lifecycle trajectory of Median Income ($) against User Age (Years) across the demographic dataset. The blue curve illustrates the median earning profile from early years through prime working age and retirement, capturing distinct career-earning plateaus and late-life economic shifts. This baseline median trajectory provides essential macro-demographic context for modeling personalized financial risk tolerances across age cohorts.
+
+9. **personalized_hedge_vs_volatility.png**
+
+![Hedge Ratio vs. Observed Market Volatility](outcomes/graphs/personalized_hedge_vs_volatility.png)
+
+The figure above plots the dynamic scaling of the Personalized Hedge Ratio (%) against Observed Market Volatility ($\sigma_t$) across three distinct psychological bias profiles: Low Bias / Frugal ($b = -0.6$, blue line), Neutral Bias ($b = 0.0$, orange line), and High Bias / Overconfident ($b = 0.6$, green line). The upward-sloping trajectories demonstrate how the Behavioral-Microstructure Matching Engine scales protection levels relative to market stress, enforcing steeper hedging requirements for overconfident risk profiles during high-volatility liquidity shocks.
+
+10. **return_distribution.png**
+
+![Return Distribution](outcomes/graphs/return_distribution.png)
+
+The figure above displays the empirical frequency histogram and fitted probability density curve of high-frequency Log Returns ($r_t$) derived from the Optiver market microstructure dataset. Exhibiting a sharp leptokurtic peak and fat tails centered tightly around zero, this distribution captures the characteristic volatility clustering and non-Gaussian risk profiles inherent in high-frequency limit order book data, providing the foundational variance inputs for the matching engine.
+
+11. **return_vs_volatility.jpg**
+
+![Return vs. 5-Observation Rolling Volatility](outcomes/graphs/return_vs_volatility.png)
+
+The scatter plot above maps high-frequency Log Returns ($r_t$) against 5-observation Rolling Realized Volatility ($\sigma_t$) derived from the Optiver limit order book data. The characteristic funnel-shaped dispersion illustrates the structural relationship between price changes and variance clustering, confirming how high-frequency volatility expands symmetrically as returns diverge from the zero-mean baseline.
+
+12. **volatility_clustering_time_series.jpg**
+
+![Volatility Clustering / Time Series (Stock ID: 0, Time Bucket: 109)](outcomes/graphs/volatility_clustering_time_series.png)
+
+The figure above displays the time-series evolution of 5-observation Rolling Realized Volatility ($\sigma_t$) across the time sequence (`seconds_in_bucket`) for Stock ID: 0 within Time Bucket: 109. The teal trajectory highlights localized volatility clustering, characterized by alternating periods of quiescence and sharp variance spikes. This granular time-series trace serves as the baseline input for evaluating how high-frequency market stress events propagate into the decentralized matching engine.
+
+13. **volatility_distribution.png**
+
+![5-Observation Rolling Return Volatility Distribution](outcomes/graphs/volatility_distribution.png)
+
+The figure above illustrates the frequency histogram and kernel density estimation curve of the 5-Observation Rolling Realized Volatility ($\sigma_t$) across the dataset. Characterized by a pronounced right skew and a dense concentration of observations near zero with a long tail extending toward higher variance levels, this distribution captures the baseline volatility profile of high-frequency limit order book returns, establishing the foundational dispersion parameters for risk-adjusted contract pricing.
+
+14. **volatility_vs_next_return.jpg**
+
+![Current Volatility vs. Next-Period Absolute Return](outcomes/graphs/volatility_vs_next_return.png)
+
+The scatter plot above maps Current Rolling Volatility ($\sigma_t$) on the horizontal axis against Next-Period Absolute Return ($|r_{t+1}|$) on the vertical axis, utilizing high-frequency Optiver market microstructure data[cite: 14]. The dense clustering near the origin alongside dispersed tail observations captures the predictive temporal dependency between current variance states and subsequent absolute price movements, validating the volatility persistence parameters integrated into the decentralized matching engine.
+
+15. **wap_time_series.png**
+
+![WAP Time Series (Stock ID: 0, Time Bucket: 109)](outcomes/graphs/wap_time_series.png)
+
+The figure above illustrates the high-frequency intra-bucket time-series evolution of the Weighted Average Price (WAP) across the time sequence (`seconds_in_bucket`) for Stock ID: 0 within Time Bucket: 109[cite: 14]. The blue trajectory captures intraday price discovery dynamics, micro-trends, and liquidity shifts, providing the foundational price series required to compute log returns and realized volatility metrics for the downstream decentralized matching engine.
