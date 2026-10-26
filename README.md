@@ -12,29 +12,45 @@ This repository processes order flow telemetry to model how non-linear trader be
 
 ```text
 .
-├── outcomes/
-│   ├── graphs/
-│   │   ├── adjustment_type_pie.png
-│   │   ├── architect_research_exhibit3.png
-│   │   ├── architect_results3.png
-│   │   └── matching_matrix3.png
-│   └── models/
-│       ├── behavioral_cols.json
-│       ├── behavioral_norm_params.npz
-│       └── global_behavioral_autoencoder.h5
-├── research/
-│   ├── data_cleaning/
-│   │   ├── acs/
-│   │   │   ├── clean_data.py
-│   │   │   ├── global_model.py
-│   │   │   └── main.py
-│   │   └── optiver/
-│   │       └── data_clean_parquet.py
+├── data_analysis/
+│   ├── data_analysis_acs.py
+│   ├── data_analysis_parquet.py
+│   └── main.py
+├── data_cleaning/
+│   ├── acs/
+│   │   ├── clean_data.py
+│   │   ├── global_model.py
+│   │   └── main.py
+│   └── optiver/
+│       └── data_clean_parquet.py
+├── feature_engineering/
 │   ├── behavioral_encode.py
 │   ├── contract_architect.py
 │   ├── main.py
 │   ├── micro_encoder.py
+│   ├── test_pipeline.py
 │   └── visualize_contract.py
+├── outcomes/
+│   ├── graphs/
+│   │   ├── bias_distribution.png
+│   │   ├── bias_vs_hedge_ratio.png
+│   │   ├── income_age_density.png
+│   │   ├── income_distribution.png
+│   │   ├── income_percentiles_by_age.png
+│   │   ├── lorenz_curve.png
+│   │   ├── matching_matrix.png
+│   │   ├── median_income_by_age.png
+│   │   ├── personalized_hedge_vs_volatility.png
+│   │   ├── return_distribution.png
+│   │   ├── return_vs_volatility.png
+│   │   ├── volatility_clustering_time_series.png
+│   │   ├── volatility_distribution.png
+│   │   ├── volatility_vs_next_return.png
+│   │   └── wap_time_series.png
+│   └── models/
+│       ├── behavioral_cols.json
+│       ├── behavioral_norm_params.npz
+│       └── global_behavioral_autoencoder.h5
 ├── .gitignore
 ├── README.md
 └── requirements.txt
@@ -103,31 +119,42 @@ The matching engine integrates high-frequency limit order book (LOB) microdata a
 
 ## Microstructure & Matching Pipeline
 
-## Microstructure & Matching Pipeline
-
 ```mermaid
 graph TD
-    %% Data Cleaning & Preprocessing
-    subgraph Data Cleaning Pipeline
-        A1[research/data_cleaning/acs/main.py] -->|Executes global_model & clean_data| A2[outcomes/models/]
-        B1[research/data_cleaning/optiver/data_clean_parquet.py] --> B2[Parquet Datasets]
+    %% Step 1: Data Cleaning Pipeline
+    subgraph Step 1: Data Cleaning Pipeline
+        DC1[data_cleaning/acs/main.py] -->|Executes global_model & clean_data| DC_MOD[outcomes/models/]
+        DC2[data_cleaning/optiver/data_clean_parquet.py] --> DC_PAR[Cleaned Parquet Datasets]
     end
 
-    %% Research Pipeline Execution
-    subgraph Research Execution Pipeline
-        C[research/main.py] --> D[research/behavioral_encode.py]
-        C --> E[research/micro_encoder.py]
-        D -->|CSV Data Inputs| F[research/contract_architect.py]
-        E -->|Parquet Data Inputs| F
-        F --> G[research/visualize_contract.py]
+    %% Step 2: Data Analysis Pipeline
+    subgraph Step 2: Data Analysis Pipeline
+        DA_MAIN[data_analysis/main.py] --> DA1[data_analysis/data_analysis_acs.py]
+        DA_MAIN --> DA2[data_analysis/data_analysis_parquet.py]
     end
+
+    %% Step 3: Feature Engineering Pipeline
+    subgraph Step 3: Feature Engineering Pipeline
+        FE_MAIN[feature_engineering/main.py<br/>Master Orchestrator] --> FE_BE[feature_engineering/behavioral_encode.py<br/>ACS -> behavioral/bias features]
+        FE_MAIN --> FE_ME[feature_engineering/micro_encoder.py<br/>Optiver -> WAP, return, rolling volatility]
+        
+        FE_BE --> FE_CA[feature_engineering/contract_architect.py<br/>user profile + market state -> hedge/risk contract]
+        FE_ME --> FE_CA
+        
+        FE_CA --> FE_TP[feature_engineering/test_pipeline.py<br/>verifies ACS + microstructure + contract interface]
+        FE_TP --> FE_VC[feature_engineering/visualize_contract.py<br/>generates contract-level research graphs]
+    end
+
+    %% Data Flow Dependencies
+    DC_MOD --> FE_BE
+    DC_PAR --> FE_ME
 
     %% Final Output Graphs
     subgraph Output Exhibits
-        G --> H1[outcomes/graphs/adjustment_type_pie.png]
-        G --> H2[outcomes/graphs/architect_research_exhibit3.png]
-        G --> H3[outcomes/graphs/architect_results3.png]
-        G --> H4[outcomes/graphs/matching_matrix3.png]
+        FE_VC --> G1[outcomes/graphs/matching_matrix.png]
+        FE_VC --> G2[outcomes/graphs/bias_distribution.png]
+        FE_VC --> G3[outcomes/graphs/personalized_hedge_vs_volatility.png]
+        FE_VC --> G4[outcomes/graphs/... (all 15 exhibits)]
     end
 ```
 
