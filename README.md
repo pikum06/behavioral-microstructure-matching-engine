@@ -131,6 +131,21 @@ graph TD
     subgraph Step2 ["Step 2: Data Analysis Pipeline"]
         DA_MAIN["data_analysis/main.py"] --> DA1["data_analysis/data_analysis_acs.py"]
         DA_MAIN --> DA2["data_analysis/data_analysis_parquet.py"]
+        
+        %% ACS Analysis Graphs
+        DA1 --> DA_ACS1["income_age_density.png"]
+        DA1 --> DA_ACS2["median_income_by_age.png"]
+        DA1 --> DA_ACS3["income_percentiles_by_age.png"]
+        DA1 --> DA_ACS4["income_distribution.png"]
+        DA1 --> DA_ACS5["lorenz_curve.png"]
+
+        %% Parquet Analysis Graphs
+        DA2 --> DA_PAR1["wap_time_series.png"]
+        DA2 --> DA_PAR2["return_distribution.png"]
+        DA2 --> DA_PAR3["volatility_distribution.png"]
+        DA2 --> DA_PAR4["return_vs_volatility.png"]
+        DA2 --> DA_PAR5["volatility_clustering_time_series.png"]
+        DA2 --> DA_PAR6["volatility_vs_next_return.png"]
     end
 
     %% Step 3: Feature Engineering Pipeline
@@ -143,19 +158,17 @@ graph TD
         
         FE_CA --> FE_TP["feature_engineering/test_pipeline.py"]
         FE_TP --> FE_VC["feature_engineering/visualize_contract.py"]
+
+        %% Contract Visualization Graphs
+        FE_VC --> FE_G1["bias_distribution.png"]
+        FE_VC --> FE_G2["bias_vs_hedge_ratio.png"]
+        FE_VC --> FE_G3["hedge_vs_volatility.png"]
+        FE_VC --> FE_G4["matching_matrix.png"]
     end
 
     %% Data Flow Dependencies
     DC_MOD --> FE_BE
     DC_PAR --> FE_ME
-
-    %% Final Output Graphs
-    subgraph Outputs ["Output Exhibits"]
-        FE_VC --> G1["outcomes/graphs/matching_matrix.png"]
-        FE_VC --> G2["outcomes/graphs/bias_distribution.png"]
-        FE_VC --> G3["outcomes/graphs/personalized_hedge_vs_volatility.png"]
-        FE_VC --> G4["outcomes/graphs/ (15+ exhibits total)"]
-    end
 ```
 
 ---
