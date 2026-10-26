@@ -45,6 +45,7 @@ def clean_microstructure_with_duckdb(input_dir, output_parquet_path):
         SELECT DISTINCT
             r.time_id,
             r.stock_id,
+            r.seconds_in_bucket,
             coalesce(r.bid_price1, m.avg_bid1) as bid_price1,
             coalesce(r.ask_price1, m.avg_ask1) as ask_price1,
             coalesce(r.bid_size1, m.avg_bsize1) as bid_size1,
@@ -67,7 +68,7 @@ def clean_microstructure_with_duckdb(input_dir, output_parquet_path):
     con.close()
 
 if __name__ == "__main__":
-    MICRO_INPUT = "../../../data/optiver/book_train.parquet"
-    MICRO_OUTPUT = "../../../outcomes/parquet/cleaned_microstructure.parquet"
+    MICRO_INPUT = "../../data/optiver/book_train.parquet"
+    MICRO_OUTPUT = "../../outcomes/parquet/cleaned_optiver_data.parquet"
     
     clean_microstructure_with_duckdb(MICRO_INPUT, MICRO_OUTPUT)

@@ -9,7 +9,7 @@ import os
 
 # Import the bias function from your behavioral module instead of redefining it
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-from behavioral_encode import calculate_bias
+from feature_engineering.behavioral_encode import calculate_bias
 
 def clean_chunk_with_frozen_model(chunk, autoencoder, mean_val, std_val, numeric_cols):
     chunk['AGEP'] = pd.to_numeric(chunk['AGEP'], errors='coerce')
