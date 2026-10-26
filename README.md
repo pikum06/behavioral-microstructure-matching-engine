@@ -119,36 +119,15 @@ The matching engine integrates high-frequency limit order book (LOB) microdata a
 
 ## Microstructure & Matching Pipeline
 
+### Data cleaning and Feature Engineering
+
 ```mermaid
 graph TD
-    %% Step 1: Data Cleaning Pipeline
     subgraph Step1 ["Step 1: Data Cleaning Pipeline"]
         DC1["data_cleaning/acs/main.py"] -->|"Executes global_model & clean_data"| DC_MOD["outcomes/models/"]
         DC2["data_cleaning/optiver/data_clean_parquet.py"] --> DC_PAR["Cleaned Parquet Datasets"]
     end
 
-    %% Step 2: Data Analysis Pipeline
-    subgraph Step2 ["Step 2: Data Analysis Pipeline"]
-        DA_MAIN["data_analysis/main.py"] --> DA1["data_analysis/data_analysis_acs.py"]
-        DA_MAIN --> DA2["data_analysis/data_analysis_parquet.py"]
-        
-        %% ACS Analysis Graphs
-        DA1 --> DA_ACS1["income_age_density.png"]
-        DA1 --> DA_ACS2["median_income_by_age.png"]
-        DA1 --> DA_ACS3["income_percentiles_by_age.png"]
-        DA1 --> DA_ACS4["income_distribution.png"]
-        DA1 --> DA_ACS5["lorenz_curve.png"]
-
-        %% Parquet Analysis Graphs
-        DA2 --> DA_PAR1["wap_time_series.png"]
-        DA2 --> DA_PAR2["return_distribution.png"]
-        DA2 --> DA_PAR3["volatility_distribution.png"]
-        DA2 --> DA_PAR4["return_vs_volatility.png"]
-        DA2 --> DA_PAR5["volatility_clustering_time_series.png"]
-        DA2 --> DA_PAR6["volatility_vs_next_return.png"]
-    end
-
-    %% Step 3: Feature Engineering Pipeline
     subgraph Step3 ["Step 3: Feature Engineering Pipeline"]
         FE_MAIN["feature_engineering/main.py (Master)"] --> FE_BE["feature_engineering/behavioral_encode.py"]
         FE_MAIN --> FE_ME["feature_engineering/micro_encoder.py"]
@@ -169,6 +148,29 @@ graph TD
     %% Data Flow Dependencies
     DC_MOD --> FE_BE
     DC_PAR --> FE_ME
+```
+
+Data Analysis Pipeline
+
+```mermaid
+graph TD
+    DA_MAIN["data_analysis/main.py"] --> DA1["data_analysis/data_analysis_acs.py"]
+    DA_MAIN --> DA2["data_analysis/data_analysis_parquet.py"]
+    
+    %% ACS Analysis Graphs
+    DA1 --> DA_ACS1["income_age_density.png"]
+    DA1 --> DA_ACS2["median_income_by_age.png"]
+    DA1 --> DA_ACS3["income_percentiles_by_age.png"]
+    DA1 --> DA_ACS4["income_distribution.png"]
+    DA1 --> DA_ACS5["lorenz_curve.png"]
+
+    %% Parquet Analysis Graphs
+    DA2 --> DA_PAR1["wap_time_series.png"]
+    DA2 --> DA_PAR2["return_distribution.png"]
+    DA2 --> DA_PAR3["volatility_distribution.png"]
+    DA2 --> DA_PAR4["return_vs_volatility.png"]
+    DA2 --> DA_PAR5["volatility_clustering_time_series.png"]
+    DA2 --> DA_PAR6["volatility_vs_next_return.png"]
 ```
 
 ---
